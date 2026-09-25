@@ -1,0 +1,2569 @@
+{
+  "info": {
+    "name": "StudyProgress API v1",
+    "description": "Ejecuta Flujo principal en orden. Colaboración requiere otro usuario registrado. Administración requiere las credenciales del administrador configurado por entorno. Limpieza elimina los recursos creados. Los tokens se guardan automáticamente; no exportes la colección con secretos reales.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "StudyProgress123",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "courseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "topicId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "taskId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reminderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shareCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "collaboratorId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminPassword",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminCategoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "futureDate",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get(\"email\")) pm.collectionVariables.set(\"email\", \"student-\" + Date.now() + \"@example.com\");",
+          "pm.collectionVariables.set(\"futureDate\", new Date(Date.now() + 86400000).toISOString());"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Flujo principal",
+      "item": [
+        {
+          "name": "Registrar estudiante",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/register",
+            "description": "Registrar estudiante. Devuelve 201 cuando la operación termina correctamente.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Estudiante Demo\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) {",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set(\"token\", body.token);",
+                  "pm.collectionVariables.set(\"refreshToken\", body.refreshToken);",
+                  "pm.collectionVariables.set(\"userId\", body.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/auth/register",
+                "description": "Registrar estudiante. Devuelve 201 cuando la operación termina correctamente.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"Estudiante Demo\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"<access-token>\",\n  \"tokenType\": \"Bearer\",\n  \"refreshToken\": \"<refresh-token>\",\n  \"expiresIn\": 900,\n  \"user\": {\n    \"id\": 1,\n    \"fullName\": \"Estudiante Demo\",\n    \"email\": \"student@example.com\",\n    \"role\": \"ROLE_STUDENT\",\n    \"enabled\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Iniciar sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "description": "Iniciar sesión. Devuelve 200 cuando la operación termina correctamente.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code < 300) {",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set(\"token\", body.token);",
+                  "pm.collectionVariables.set(\"refreshToken\", body.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/auth/login",
+                "description": "Iniciar sesión. Devuelve 200 cuando la operación termina correctamente.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"<access-token>\",\n  \"tokenType\": \"Bearer\",\n  \"refreshToken\": \"<refresh-token>\",\n  \"expiresIn\": 900,\n  \"user\": {\n    \"id\": 1,\n    \"fullName\": \"Estudiante Demo\",\n    \"email\": \"student@example.com\",\n    \"role\": \"ROLE_STUDENT\",\n    \"enabled\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Renovar sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/refresh",
+            "description": "Renovar sesión. Devuelve 200 cuando la operación termina correctamente.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code < 300) {",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set(\"token\", body.token);",
+                  "pm.collectionVariables.set(\"refreshToken\", body.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/auth/refresh",
+                "description": "Renovar sesión. Devuelve 200 cuando la operación termina correctamente.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"<access-token>\",\n  \"tokenType\": \"Bearer\",\n  \"refreshToken\": \"<refresh-token>\",\n  \"expiresIn\": 900,\n  \"user\": {\n    \"id\": 1,\n    \"fullName\": \"Estudiante Demo\",\n    \"email\": \"student@example.com\",\n    \"role\": \"ROLE_STUDENT\",\n    \"enabled\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Ver perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/users/me",
+            "description": "Ver perfil. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/users/me",
+                "description": "Ver perfil. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"fullName\": \"Estudiante Demo\",\n  \"email\": \"student@example.com\",\n  \"role\": \"ROLE_STUDENT\",\n  \"enabled\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/users/me",
+            "description": "Actualizar perfil. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Estudiante StudyProgress\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/users/me",
+                "description": "Actualizar perfil. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"Estudiante StudyProgress\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"fullName\": \"Estudiante Demo\",\n  \"email\": \"student@example.com\",\n  \"role\": \"ROLE_STUDENT\",\n  \"enabled\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/categories?page=0&size=20",
+            "description": "Listar categorías. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/categories?page=0&size=20",
+                "description": "Listar categorías. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"name\": \"Programación\",\n      \"description\": \"Desarrollo de software\"\n    }\n  ],\n  \"number\": 0,\n  \"size\": 20,\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"first\": true,\n  \"last\": true,\n  \"empty\": false\n}"
+            }
+          ]
+        },
+        {
+          "name": "Ver categoría",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
+            "description": "Ver categoría. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/categories/{{categoryId}}",
+                "description": "Ver categoría. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Programación\",\n  \"description\": \"Desarrollo de software\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear curso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/courses",
+            "description": "Crear curso. Devuelve 201 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Desarrollo Basado en Plataformas\",\n  \"description\": \"Preparación del proyecto\",\n  \"categoryId\": \"{{categoryId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) {",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set(\"courseId\", body.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/courses",
+                "description": "Crear curso. Devuelve 201 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Desarrollo Basado en Plataformas\",\n  \"description\": \"Preparación del proyecto\",\n  \"categoryId\": \"{{categoryId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Desarrollo Basado en Plataformas\",\n  \"description\": \"Backend con Spring Boot\",\n  \"categoryId\": 1,\n  \"ownerId\": 1,\n  \"progressPercentage\": 0.0,\n  \"publicAccess\": false,\n  \"collaboratorIds\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Buscar cursos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/courses?search=Desarrollo&page=0&size=20",
+            "description": "Buscar cursos. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/courses?search=Desarrollo&page=0&size=20",
+                "description": "Buscar cursos. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"title\": \"Desarrollo Basado en Plataformas\",\n      \"description\": \"Backend con Spring Boot\",\n      \"categoryId\": 1,\n      \"ownerId\": 1,\n      \"progressPercentage\": 0.0,\n      \"publicAccess\": false,\n      \"collaboratorIds\": []\n    }\n  ],\n  \"number\": 0,\n  \"size\": 20,\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"first\": true,\n  \"last\": true,\n  \"empty\": false\n}"
+            }
+          ]
+        },
+        {
+          "name": "Detalle del curso",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseId}}",
+            "description": "Detalle del curso. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/courses/{{courseId}}",
+                "description": "Detalle del curso. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"course\": {\n    \"id\": 1,\n    \"title\": \"Desarrollo Basado en Plataformas\",\n    \"description\": \"Backend con Spring Boot\",\n    \"categoryId\": 1,\n    \"ownerId\": 1,\n    \"progressPercentage\": 0.0,\n    \"publicAccess\": false,\n    \"collaboratorIds\": []\n  },\n  \"topics\": [\n    {\n      \"id\": 1,\n      \"courseId\": 1,\n      \"title\": \"Spring Security\",\n      \"orderIndex\": 0,\n      \"completed\": false,\n      \"tasks\": [\n        {\n          \"id\": 1,\n          \"topicId\": 1,\n          \"title\": \"Implementar login\",\n          \"description\": \"Validar credenciales\",\n          \"dueDate\": \"2026-10-01T12:00:00Z\",\n          \"completed\": false,\n          \"studyMinutes\": 0\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar curso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseId}}",
+            "description": "Actualizar curso. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Desarrollo Basado en Plataformas\",\n  \"description\": \"Backend con Spring Boot\",\n  \"categoryId\": \"{{categoryId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/courses/{{courseId}}",
+                "description": "Actualizar curso. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Desarrollo Basado en Plataformas\",\n  \"description\": \"Backend con Spring Boot\",\n  \"categoryId\": \"{{categoryId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Desarrollo Basado en Plataformas\",\n  \"description\": \"Backend con Spring Boot\",\n  \"categoryId\": 1,\n  \"ownerId\": 1,\n  \"progressPercentage\": 0.0,\n  \"publicAccess\": false,\n  \"collaboratorIds\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear tema",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/topics",
+            "description": "Crear tema. Devuelve 201 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spring Security\",\n  \"orderIndex\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) {",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set(\"topicId\", body.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/topics",
+                "description": "Crear tema. Devuelve 201 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Spring Security\",\n  \"orderIndex\": 0\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"courseId\": 1,\n  \"title\": \"Spring Security\",\n  \"orderIndex\": 0,\n  \"completed\": false,\n  \"tasks\": [\n    {\n      \"id\": 1,\n      \"topicId\": 1,\n      \"title\": \"Implementar login\",\n      \"description\": \"Validar credenciales\",\n      \"dueDate\": \"2026-10-01T12:00:00Z\",\n      \"completed\": false,\n      \"studyMinutes\": 0\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar temas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/topics",
+            "description": "Listar temas. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/topics",
+                "description": "Listar temas. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": 1,\n    \"courseId\": 1,\n    \"title\": \"Spring Security\",\n    \"orderIndex\": 0,\n    \"completed\": false,\n    \"tasks\": [\n      {\n        \"id\": 1,\n        \"topicId\": 1,\n        \"title\": \"Implementar login\",\n        \"description\": \"Validar credenciales\",\n        \"dueDate\": \"2026-10-01T12:00:00Z\",\n        \"completed\": false,\n        \"studyMinutes\": 0\n      }\n    ]\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Ver tema",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/topics/{{topicId}}",
+            "description": "Ver tema. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/topics/{{topicId}}",
+                "description": "Ver tema. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"courseId\": 1,\n  \"title\": \"Spring Security\",\n  \"orderIndex\": 0,\n  \"completed\": false,\n  \"tasks\": [\n    {\n      \"id\": 1,\n      \"topicId\": 1,\n      \"title\": \"Implementar login\",\n      \"description\": \"Validar credenciales\",\n      \"dueDate\": \"2026-10-01T12:00:00Z\",\n      \"completed\": false,\n      \"studyMinutes\": 0\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar tema",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/topics/{{topicId}}",
+            "description": "Actualizar tema. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Seguridad con JWT\",\n  \"orderIndex\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/topics/{{topicId}}",
+                "description": "Actualizar tema. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Seguridad con JWT\",\n  \"orderIndex\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"courseId\": 1,\n  \"title\": \"Spring Security\",\n  \"orderIndex\": 0,\n  \"completed\": false,\n  \"tasks\": [\n    {\n      \"id\": 1,\n      \"topicId\": 1,\n      \"title\": \"Implementar login\",\n      \"description\": \"Validar credenciales\",\n      \"dueDate\": \"2026-10-01T12:00:00Z\",\n      \"completed\": false,\n      \"studyMinutes\": 0\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear tarea",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/topics/{{topicId}}/tasks",
+            "description": "Crear tarea. Devuelve 201 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Implementar login\",\n  \"description\": \"Validar credenciales\",\n  \"dueDate\": \"{{futureDate}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) {",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set(\"taskId\", body.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/topics/{{topicId}}/tasks",
+                "description": "Crear tarea. Devuelve 201 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Implementar login\",\n  \"description\": \"Validar credenciales\",\n  \"dueDate\": \"{{futureDate}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"topicId\": 1,\n  \"title\": \"Implementar login\",\n  \"description\": \"Validar credenciales\",\n  \"dueDate\": \"2026-10-01T12:00:00Z\",\n  \"completed\": false,\n  \"studyMinutes\": 0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar tareas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/topics/{{topicId}}/tasks",
+            "description": "Listar tareas. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/topics/{{topicId}}/tasks",
+                "description": "Listar tareas. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": 1,\n    \"topicId\": 1,\n    \"title\": \"Implementar login\",\n    \"description\": \"Validar credenciales\",\n    \"dueDate\": \"2026-10-01T12:00:00Z\",\n    \"completed\": false,\n    \"studyMinutes\": 0\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Ver tarea",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}",
+            "description": "Ver tarea. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}",
+                "description": "Ver tarea. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"topicId\": 1,\n  \"title\": \"Implementar login\",\n  \"description\": \"Validar credenciales\",\n  \"dueDate\": \"2026-10-01T12:00:00Z\",\n  \"completed\": false,\n  \"studyMinutes\": 0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar tarea",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}",
+            "description": "Actualizar tarea. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Probar login\",\n  \"description\": \"Validar errores y contraseña\",\n  \"dueDate\": \"{{futureDate}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}",
+                "description": "Actualizar tarea. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Probar login\",\n  \"description\": \"Validar errores y contraseña\",\n  \"dueDate\": \"{{futureDate}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"topicId\": 1,\n  \"title\": \"Implementar login\",\n  \"description\": \"Validar credenciales\",\n  \"dueDate\": \"2026-10-01T12:00:00Z\",\n  \"completed\": false,\n  \"studyMinutes\": 0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Programar recordatorio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reminders",
+            "description": "Programar recordatorio. Devuelve 201 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reminderTime\": \"{{futureDate}}\",\n  \"taskIds\": [\n    \"{{taskId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) {",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set(\"reminderId\", body.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/reminders",
+                "description": "Programar recordatorio. Devuelve 201 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reminderTime\": \"{{futureDate}}\",\n  \"taskIds\": [\n    \"{{taskId}}\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"reminderTime\": \"2026-10-01T12:00:00Z\",\n  \"sent\": false,\n  \"attempts\": 0,\n  \"taskIds\": [\n    1\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar recordatorios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/reminders?page=0&size=20",
+            "description": "Listar recordatorios. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/reminders?page=0&size=20",
+                "description": "Listar recordatorios. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"reminderTime\": \"2026-10-01T12:00:00Z\",\n      \"sent\": false,\n      \"attempts\": 0,\n      \"taskIds\": [\n        1\n      ]\n    }\n  ],\n  \"number\": 0,\n  \"size\": 20,\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"first\": true,\n  \"last\": true,\n  \"empty\": false\n}"
+            }
+          ]
+        },
+        {
+          "name": "Ver recordatorio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/reminders/{{reminderId}}",
+            "description": "Ver recordatorio. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/reminders/{{reminderId}}",
+                "description": "Ver recordatorio. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"reminderTime\": \"2026-10-01T12:00:00Z\",\n  \"sent\": false,\n  \"attempts\": 0,\n  \"taskIds\": [\n    1\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar recordatorio",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reminders/{{reminderId}}",
+            "description": "Actualizar recordatorio. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reminderTime\": \"{{futureDate}}\",\n  \"taskIds\": [\n    \"{{taskId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/reminders/{{reminderId}}",
+                "description": "Actualizar recordatorio. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reminderTime\": \"{{futureDate}}\",\n  \"taskIds\": [\n    \"{{taskId}}\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"reminderTime\": \"2026-10-01T12:00:00Z\",\n  \"sent\": false,\n  \"attempts\": 0,\n  \"taskIds\": [\n    1\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Completar tarea",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}/progress",
+            "description": "Completar tarea. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"completed\": true,\n  \"studyMinutes\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}/progress",
+                "description": "Completar tarea. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"completed\": true,\n  \"studyMinutes\": 45\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"topicId\": 1,\n  \"title\": \"Implementar login\",\n  \"description\": \"Validar credenciales\",\n  \"dueDate\": \"2026-10-01T12:00:00Z\",\n  \"completed\": false,\n  \"studyMinutes\": 0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Completar tema",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/topics/{{topicId}}/progress",
+            "description": "Completar tema. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"completed\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/topics/{{topicId}}/progress",
+                "description": "Completar tema. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"completed\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"courseId\": 1,\n  \"title\": \"Spring Security\",\n  \"orderIndex\": 0,\n  \"completed\": false,\n  \"tasks\": [\n    {\n      \"id\": 1,\n      \"topicId\": 1,\n      \"title\": \"Implementar login\",\n      \"description\": \"Validar credenciales\",\n      \"dueDate\": \"2026-10-01T12:00:00Z\",\n      \"completed\": false,\n      \"studyMinutes\": 0\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/statistics/dashboard",
+            "description": "Dashboard. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/statistics/dashboard",
+                "description": "Dashboard. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"courses\": 1,\n  \"totalTasks\": 1,\n  \"completedTasks\": 0,\n  \"studyMinutes\": 0,\n  \"progressPercentage\": 0.0,\n  \"courseProgress\": [\n    {\n      \"id\": 1,\n      \"title\": \"Desarrollo Basado en Plataformas\",\n      \"description\": \"Backend con Spring Boot\",\n      \"categoryId\": 1,\n      \"ownerId\": 1,\n      \"progressPercentage\": 0.0,\n      \"publicAccess\": false,\n      \"collaboratorIds\": []\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Historial estadístico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/statistics?page=0&size=20",
+            "description": "Historial estadístico. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/statistics?page=0&size=20",
+                "description": "Historial estadístico. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"recordedAt\": \"2026-09-25T01:00:00Z\",\n      \"totalTasks\": 1,\n      \"tasksCompletedCount\": 0,\n      \"studyMinutes\": 0\n    }\n  ],\n  \"number\": 0,\n  \"size\": 20,\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"first\": true,\n  \"last\": true,\n  \"empty\": false\n}"
+            }
+          ]
+        },
+        {
+          "name": "Activar enlace público",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/share",
+            "description": "Activar enlace público. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code < 300) {",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set(\"shareCode\", body.shareCode);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/share",
+                "description": "Activar enlace público. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"shareCode\": \"cbd04852-0db5-4f02-af10-932b0dc5cd95\",\n  \"path\": \"/api/v1/public/courses/cbd04852-0db5-4f02-af10-932b0dc5cd95\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Consultar curso público",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/public/courses/{{shareCode}}",
+            "description": "Consultar curso público. Devuelve 200 cuando la operación termina correctamente.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/public/courses/{{shareCode}}",
+                "description": "Consultar curso público. Devuelve 200 cuando la operación termina correctamente.",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"title\": \"Desarrollo Basado en Plataformas\",\n  \"description\": \"Backend con Spring Boot\",\n  \"progressPercentage\": 0.0,\n  \"topics\": [\n    {\n      \"title\": \"Spring Security\",\n      \"completed\": false,\n      \"tasks\": [\n        {\n          \"title\": \"Implementar login\",\n          \"completed\": false\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Revocar enlace público",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/share",
+            "description": "Revocar enlace público. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/share",
+                "description": "Revocar enlace público. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"shareCode\": \"cbd04852-0db5-4f02-af10-932b0dc5cd95\",\n  \"path\": \"/api/v1/public/courses/cbd04852-0db5-4f02-af10-932b0dc5cd95\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Colaboración",
+      "item": [
+        {
+          "name": "Agregar colaborador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/collaborators",
+            "description": "El propietario concede acceso a un estudiante registrado. Configura collaboratorId con su identificador.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{collaboratorId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/collaborators",
+                "description": "El propietario concede acceso a un estudiante registrado. Configura collaboratorId con su identificador.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{collaboratorId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Desarrollo Basado en Plataformas\",\n  \"description\": \"Backend con Spring Boot\",\n  \"categoryId\": 1,\n  \"ownerId\": 1,\n  \"progressPercentage\": 0.0,\n  \"publicAccess\": false,\n  \"collaboratorIds\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Quitar colaborador",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/collaborators/{{collaboratorId}}",
+            "description": "Quitar colaborador. Devuelve 204 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 204",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/courses/{{courseId}}/collaborators/{{collaboratorId}}",
+                "description": "Quitar colaborador. Devuelve 204 cuando la operación termina correctamente."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Administración",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{adminToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Login administrador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "description": "Login administrador. Devuelve 200 cuando la operación termina correctamente.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code < 300) {",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set(\"adminToken\", body.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/auth/login",
+                "description": "Login administrador. Devuelve 200 cuando la operación termina correctamente.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"<access-token>\",\n  \"tokenType\": \"Bearer\",\n  \"refreshToken\": \"<refresh-token>\",\n  \"expiresIn\": 900,\n  \"user\": {\n    \"id\": 1,\n    \"fullName\": \"Estudiante Demo\",\n    \"email\": \"student@example.com\",\n    \"role\": \"ROLE_STUDENT\",\n    \"enabled\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/users?page=0&size=20",
+            "description": "Listar usuarios. Devuelve 200 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/users?page=0&size=20",
+                "description": "Listar usuarios. Devuelve 200 cuando la operación termina correctamente."
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"fullName\": \"Estudiante Demo\",\n      \"email\": \"student@example.com\",\n      \"role\": \"ROLE_STUDENT\",\n      \"enabled\": true\n    }\n  ],\n  \"number\": 0,\n  \"size\": 20,\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"first\": true,\n  \"last\": true,\n  \"empty\": false\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cambiar rol",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}/role",
+            "description": "Cambiar rol. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"ROLE_STUDENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/users/{{userId}}/role",
+                "description": "Cambiar rol. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"ROLE_STUDENT\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"fullName\": \"Estudiante Demo\",\n  \"email\": \"student@example.com\",\n  \"role\": \"ROLE_STUDENT\",\n  \"enabled\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/categories",
+            "description": "Crear categoría. Devuelve 201 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Categoría de prueba\",\n  \"description\": \"Creada por administrador\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "if (pm.response.code < 300) {",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set(\"adminCategoryId\", body.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/categories",
+                "description": "Crear categoría. Devuelve 201 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Categoría de prueba\",\n  \"description\": \"Creada por administrador\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Programación\",\n  \"description\": \"Desarrollo de software\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/categories/{{adminCategoryId}}",
+            "description": "Actualizar categoría. Devuelve 200 cuando la operación termina correctamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Categoría actualizada\",\n  \"description\": \"Edición de prueba\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/categories/{{adminCategoryId}}",
+                "description": "Actualizar categoría. Devuelve 200 cuando la operación termina correctamente.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Categoría actualizada\",\n  \"description\": \"Edición de prueba\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Programación\",\n  \"description\": \"Desarrollo de software\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Eliminar categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/categories/{{adminCategoryId}}",
+            "description": "Eliminar categoría. Devuelve 204 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 204",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/categories/{{adminCategoryId}}",
+                "description": "Eliminar categoría. Devuelve 204 cuando la operación termina correctamente."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Limpieza",
+      "item": [
+        {
+          "name": "Eliminar recordatorio",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/reminders/{{reminderId}}",
+            "description": "Eliminar recordatorio. Devuelve 204 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 204",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/reminders/{{reminderId}}",
+                "description": "Eliminar recordatorio. Devuelve 204 cuando la operación termina correctamente."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Eliminar tarea",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}",
+            "description": "Eliminar tarea. Devuelve 204 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 204",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}",
+                "description": "Eliminar tarea. Devuelve 204 cuando la operación termina correctamente."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Eliminar tema",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/topics/{{topicId}}",
+            "description": "Eliminar tema. Devuelve 204 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 204",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/topics/{{topicId}}",
+                "description": "Eliminar tema. Devuelve 204 cuando la operación termina correctamente."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Eliminar curso",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/courses/{{courseId}}",
+            "description": "Eliminar curso. Devuelve 204 cuando la operación termina correctamente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 204",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": "{{baseUrl}}/api/v1/courses/{{courseId}}",
+                "description": "Eliminar curso. Devuelve 204 cuando la operación termina correctamente."
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Cerrar sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/logout",
+            "description": "Cerrar sesión. Devuelve 204 cuando la operación termina correctamente.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Ejemplo 204",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": "{{baseUrl}}/api/v1/auth/logout",
+                "description": "Cerrar sesión. Devuelve 204 cuando la operación termina correctamente.",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

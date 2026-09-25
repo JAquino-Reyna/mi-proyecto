@@ -1,35 +1,22 @@
 package com.studyprogress.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
+import lombok.Getter;
+import lombok.Setter;
+import java.time.Instant;
+import java.util.*;
 
 @Entity
-@Table(name = "statistics")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "statistics", indexes = @Index(name = "idx_statistics_lookup", columnList = "user_id,recorded_at"))
+@Getter
+@Setter
 public class Statistic {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Min(value = 0, message = "Los minutos de estudio no pueden ser negativos")
-    private Integer studyMinutes = 0;
-
-    @Min(value = 0, message = "La cantidad de tareas completadas no puede ser negativa")
-    private Integer tasksCompletedCount = 0;
-
-    @NotNull(message = "La fecha de registro es obligatoria")
-    private LocalDate recordedAt = LocalDate.now();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Version private Long version;
+    @Column(nullable = false) private int studyMinutes;
+    @Column(nullable = false) private int tasksCompletedCount;
+    @Column(nullable = false) private int totalTasks;
+    @Column(nullable = false) private Instant recordedAt = Instant.now();
+    @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "user_id", nullable = false) private User user;
 }

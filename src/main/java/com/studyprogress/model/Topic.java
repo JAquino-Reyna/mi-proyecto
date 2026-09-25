@@ -1,35 +1,23 @@
 package com.studyprogress.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
+import java.time.Instant;
+import java.util.*;
 
 @Entity
-@Table(name = "topics")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "topics", indexes = @Index(name = "idx_topics_lookup", columnList = "course_id"))
+@Getter
+@Setter
 public class Topic {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank(message = "El título del tema es obligatorio")
-    private String title;
-
-    private Integer orderIndex;
-
-    private Boolean isCompleted = false;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
-    private Course course;
-
-    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Task> tasks;
+    @Version private Long version;
+    @Column(nullable = false, length = 150) @NotBlank private String title;
+    @Column(nullable = false) private int orderIndex;
+    @Column(nullable = false) private boolean completed;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "course_id", nullable = false) private Course course;
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true) @OrderBy("id ASC") private List<Task> tasks = new ArrayList<>();
 }

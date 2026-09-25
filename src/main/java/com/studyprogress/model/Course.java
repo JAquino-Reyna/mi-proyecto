@@ -1,45 +1,26 @@
 package com.studyprogress.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
+import java.time.Instant;
+import java.util.*;
 
 @Entity
-@Table(name = "courses")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "courses", indexes = @Index(name = "idx_courses_lookup", columnList = "user_id,category_id"))
+@Getter
+@Setter
 public class Course {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank(message = "El título del curso es obligatorio")
-    @Column(nullable = false)
-    private String title;
-
-    private String description;
-
-    private Boolean isPublic = false;
-
-    @Column(unique = true)
-    private String shareCode;
-
-    private Double progressPercentage = 0.0;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Topic> topics;
+    @Version private Long version;
+    @Column(nullable = false, length = 150) @NotBlank private String title;
+    @Column(length = 2000) private String description;
+    @Column(nullable = false) private boolean publicAccess;
+    @Column(unique = true, length = 36) private String shareCode;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "category_id", nullable = false) private Category category;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "user_id", nullable = false) private User user;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true) @OrderBy("orderIndex ASC, id ASC") private List<Topic> topics = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY) @JoinTable(name = "user_courses", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "user_id")) private Set<User> collaborators = new HashSet<>();
 }

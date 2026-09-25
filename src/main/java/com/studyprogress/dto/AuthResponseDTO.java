@@ -1,12 +1,8 @@
 package com.studyprogress.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.validation.constraints.*;
+import com.studyprogress.model.User;
+import java.time.Instant;
+import java.util.*;
 
-@Data
-@AllArgsConstructor
-public class AuthResponseDTO {
-    private String token;
-    private String tokenType;
-    private String email;
-}
+public record AuthResponseDTO(String token, String tokenType, String refreshToken, long expiresIn, UserResponseDTO user) {}

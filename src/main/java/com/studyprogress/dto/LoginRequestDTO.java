@@ -1,13 +1,8 @@
 package com.studyprogress.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import jakarta.validation.constraints.*;
+import com.studyprogress.model.User;
+import java.time.Instant;
+import java.util.*;
 
-@Data
-public class LoginRequestDTO {
-    @NotBlank @Email
-    private String email;
-    @NotBlank
-    private String password;
-}
+public record LoginRequestDTO(@NotBlank @Email String email, @NotBlank @Size(max = 72) String password) {}

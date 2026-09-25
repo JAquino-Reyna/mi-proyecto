@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: studyprogress
+      POSTGRES_USER: studyprogress
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?Define DATABASE_PASSWORD}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studyprogress"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  mailpit:
+    image: axllent/mailpit:v1.20
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: jdbc:postgresql://db:5432/studyprogress
+      DATABASE_USERNAME: studyprogress
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?Define DATABASE_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET de al menos 32 bytes}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      API_DOCS_ENABLED: "true"
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+volumes:
+  database:

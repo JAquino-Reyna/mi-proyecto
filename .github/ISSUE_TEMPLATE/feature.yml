@@ -1,0 +1,20 @@
+name: Funcionalidad
+description: Organizar una tarea del backend
+title: "[Feature] "
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objetivo
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Criterios de aceptación
+    validations:
+      required: true
+  - type: input
+    id: deadline
+    attributes:
+      label: Fecha prevista

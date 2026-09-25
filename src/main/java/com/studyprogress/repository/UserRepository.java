@@ -1,13 +1,14 @@
 package com.studyprogress.repository;
 
 import com.studyprogress.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.*;
+import jakarta.persistence.LockModeType;
+import java.time.Instant;
+import java.util.*;
 
-import java.util.Optional;
-
-@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
-    Boolean existsByEmail(String email);
+    boolean existsByEmail(String email);
 }

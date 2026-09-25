@@ -1,38 +1,23 @@
 package com.studyprogress.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import java.time.Instant;
+import java.util.*;
 
 @Entity
-@Table(name = "reminders")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "reminders", indexes = @Index(name = "idx_reminders_lookup", columnList = "user_id,reminder_time"))
+@Getter
+@Setter
 public class Reminder {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotNull(message = "La fecha y hora del recordatorio son obligatorias")
-    private LocalDateTime reminderTime;
-
-    private Boolean sent = false;
-
-    @Enumerated(EnumType.STRING)
-    private NotificationType notificationType = NotificationType.EMAIL;
-
-    @ManyToMany(mappedBy = "reminders")
-    private List<Task> tasks;
-
-    public enum NotificationType {
-        EMAIL,
-        IN_APP
-    }
+    @Version private Long version;
+    @Column(nullable = false) private Instant reminderTime;
+    @Column(nullable = false) private boolean sent;
+    @Column(nullable = false) private int attempts;
+    private Instant lastAttempt;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "user_id", nullable = false) private User user;
+    @ManyToMany(fetch = FetchType.LAZY) @JoinTable(name = "task_reminders", joinColumns = @JoinColumn(name = "reminder_id"), inverseJoinColumns = @JoinColumn(name = "task_id")) private Set<Task> tasks = new HashSet<>();
 }

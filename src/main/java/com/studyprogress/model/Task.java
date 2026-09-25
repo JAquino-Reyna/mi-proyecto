@@ -1,43 +1,25 @@
 package com.studyprogress.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
+import java.time.Instant;
+import java.util.*;
 
 @Entity
-@Table(name = "tasks")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "tasks", indexes = @Index(name = "idx_tasks_lookup", columnList = "topic_id"))
+@Getter
+@Setter
 public class Task {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank(message = "El título de la tarea es obligatorio")
-    private String title;
-
-    private String description;
-
-    private LocalDateTime dueDate;
-
-    private Boolean isCompleted = false;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "topic_id")
-    private Topic topic;
-
-    @ManyToMany
-    @JoinTable(
-            name = "task_reminders",
-            joinColumns = @JoinColumn(name = "task_id"),
-            inverseJoinColumns = @JoinColumn(name = "reminder_id")
-    )
-    private List<Reminder> reminders;
+    @Version private Long version;
+    @Column(nullable = false, length = 150) @NotBlank private String title;
+    @Column(length = 2000) private String description;
+    private Instant dueDate;
+    @Column(nullable = false) private boolean completed;
+    @Column(nullable = false) @Min(0) private int studyMinutes;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "topic_id", nullable = false) private Topic topic;
+    @ManyToMany(mappedBy = "tasks", fetch = FetchType.LAZY) private Set<Reminder> reminders = new HashSet<>();
 }

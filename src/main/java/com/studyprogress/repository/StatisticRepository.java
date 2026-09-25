@@ -1,12 +1,13 @@
 package com.studyprogress.repository;
 
 import com.studyprogress.model.Statistic;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.*;
+import jakarta.persistence.LockModeType;
+import java.time.Instant;
+import java.util.*;
 
-import java.util.List;
-
-@Repository
 public interface StatisticRepository extends JpaRepository<Statistic, Long> {
-    List<Statistic> findByUserId(Long userId);
+    Page<Statistic> findByUserIdOrderByRecordedAtDesc(Long userId, Pageable pageable);
 }

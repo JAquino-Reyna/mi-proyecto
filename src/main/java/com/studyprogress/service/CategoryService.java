@@ -1,8 +1,11 @@
 package com.studyprogress.service;
 
-import com.studyprogress.dto.CategoryResponseDTO;
-import java.util.List;
-
+import com.studyprogress.dto.*;
+import org.springframework.data.domain.*;
 public interface CategoryService {
-    List<CategoryResponseDTO> getAllCategories();
+    Page<CategoryResponseDTO> list(Pageable page);
+    CategoryResponseDTO get(Long id);
+    CategoryResponseDTO create(CategoryRequestDTO request);
+    CategoryResponseDTO update(Long id, CategoryRequestDTO request);
+    void delete(Long id);
 }

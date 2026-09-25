@@ -1,14 +1,8 @@
 package com.studyprogress.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.*;
+import com.studyprogress.model.User;
+import java.time.Instant;
+import java.util.*;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class CategoryResponseDTO {
-    private Long id;
-    private String name;
-    private String description;
-}
+public record CategoryResponseDTO(Long id, String name, String description) {}
